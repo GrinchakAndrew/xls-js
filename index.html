@@ -31,21 +31,43 @@
 				</ul>
 			</li>
 		</ul>
+		<textarea id="range_new_val_text_area">
+		{
+			1. All Client_Names -> array
+2. All Tasks_Names -> array
+3. All IDs_+_Tasks -> array
+4. forEach -> Client_Names(Client_Name) {
+	4.1. Client_Name copyTo B2-B[Client_Names.length], Final List
+	4.2. IDs_+_Tasks.forEach(IDs_+_Task) {
+	   	 IDs_+_Task copyTo D2-D[IDs_+_Tasks.length], Final List
+	 }
+	4.3. Tasks_Names.forEach(Tasks_Name) {
+		Tasks_Name copyTo F2-F[Tasks_Names.length], Final List
+	}
+}
+		}
 		
-		<textarea>Begin typing here</textarea>
+		</textarea>
+		
+		<!--
+		1. All Client_Names -> array
+		2. All Tasks_Names -> array
+		3. All IDs_+_Tasks -> array
+		4. forEach -> Client_Names(Client_Name) {
+			4.1. Client_Name copyTo B2-B[Client_Names.length], Final List
+			4.2. IDs_+_Tasks.forEach(IDs_+_Task) {
+			   	 IDs_+_Task copyTo D2-D[IDs_+_Tasks.length], Final List
+			 }
+			 4.3. Tasks_Names.forEach(Tasks_Name) {
+				Tasks_Name copyTo F2-F[Tasks_Names.length], Final List
+			}
+		}
+		-->
+		
 		<div id="btn_wrapper">
 			<button id="process_wb">Process the Workbook!</button>
 			<button id="clear_wb">Clear the Workbook!</button>
 		</div>
-		</div>
-		<div id="table-preview">
-			<table>
-				<thead>
-					<tr></tr>
-				</thead>
-				<tbody></tbody>
-			</table>
-		
 		</div>
 	</div>
 </body>
