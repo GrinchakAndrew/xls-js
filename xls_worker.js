@@ -9,6 +9,7 @@ var config = {
 	f : '',
 	clientNames : '', 
 	tasksNames : '',
+	tasksNumber : '',
 	IDs : '',
 	IDs_plus_Tasks : [],
 	fnArr : [function(el) {
@@ -180,40 +181,6 @@ var config = {
 	
 	processWb : function() {
 				/*processing the workbook here:*/
-				debugger;
-					if(({}).toString.call(config.theWhat) == '[object Object]') {
-							for (var sheet in config.theWhat){
-								debugger;
-								if(config.theWhat[sheet] && ({}).toString.call(config.theWhat[sheet]) == '[object Array]' && config.workSheet == sheet) {
-									config.theWhat[sheet].forEach(function(i, j) {
-										debugger;
-										for (var cell in i) {
-											if(cell.match(/[-]/)) {
-											/*we have got a range!*/
-												var s = cell.split('-')[0];
-												var e = cell.split('-')[1];
-												var sD = parseInt(s.match(/\d+/g)[0]);
-												var eD = parseInt(e.match(/\d+/g)[0]);
-												var rangeLetter = s.match(/\D+/g)[0];
-												for (var y = sD; y < eD+1; y++) {
-													if(config.wb.Sheets[sheet][rangeLetter+y]) {
-														config.wb.Sheets[sheet][rangeLetter+y]['v'] = i[cell];
-													} else {
-														config.wb.Sheets[sheet][rangeLetter+y] = {t: "n", v: i[cell], f: '', w: "0"};
-													}
-												}
-											} else {
-												if(config.wb.Sheets[sheet][cell]){
-												config.wb.Sheets[sheet][cell]['v'] = i[cell];
-												}else {
-													config.wb.Sheets[sheet][cell] = {t: "n", v: i[cell], f: '', w: "0"};
-												}
-											}
-										}
-									});
-								}
-							}
-					}
 						var wopts = { bookType:'xlsx', bookSST:false, type:'binary'};
 						var wbout = XLSX.write(config.wb, wopts);
 						function s2ab(s) {
@@ -279,10 +246,8 @@ $('#drag-and-drop').on(
 	
 	/*processing the process the workbook btn*/
 	$('#process_wb').on('click', function() {
-		debugger;
 		var val = $('textarea[id="range_new_val_text_area"]').val();
 		/* config.workSheet = $('textarea[id="ws_text_area"]').val(); */
-		
 		/*match if we have got the Date to set to the table*/
 		if(val &&  $('tbody').html() && $('textarea[id="range_new_val_text_area"]').val().match(/^\n?\s?\D+?\d+?\s?(?=[-])\s?[-]\s?\D+\d+\s?[:]\s?.*/)) {
 			if(val.match(/new Date/) && $('textarea[id="range_new_val_text_area"]').val().match(/^\n?\s?\D+?\d+?\s?(?=[-])\s?[-]\s?\D+\d+\s?[:]\s?.*/)){
@@ -323,11 +288,11 @@ $('#drag-and-drop').on(
 							var workbook = config.wb.Workbook.Sheets;
 							var letterRanges = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
 							var returnable = [];
-							workbook.forEach(function(sheet) {
+							workbook.forEach(function(sheet){
 								if(sheet['name'] == workSheet) {
 									var ref = config.wb.Sheets[sheet['name']]['!ref'];
 									var upperBound = parseInt(config.wb.Sheets[sheet['name']]['!ref'].split(':')[1].match(/\d+/));
-									letterRanges.forEach(function(letter){
+									letterRanges.forEach(function(letter) {
 										var _columnName = config.wb.Sheets[sheet['name']][letter+1] ? config.wb.Sheets[sheet['name']][letter+1]['v'] : '';
 										var theLetter = '';
 											if(_columnName == columnName){
@@ -344,11 +309,14 @@ $('#drag-and-drop').on(
 								}
 							});
 							return returnable;
-							
 						};
 						config.clientNames = getItemNamesByColumn('Campaigns', 'Client Name');
 						//2. get All the Tasks_Names -> array
-						config.tasksNames = getItemNamesByColumn('WBS', 'Task name')
+						config.tasksNames = getItemNamesByColumn('WBS', 'Task name');
+						config.tasksNames.reverse();
+						config.tasksNumber = getItemNamesByColumn('WBS', 'Task number');
+						config.tasksNumber.reverse();
+						
 						//3. All IDs -> array
 						config.IDs = getItemNamesByColumn('Campaigns', 'ID');
 						//3.1 All IDs_+_Tasks -> array for SubTask Number 
@@ -356,94 +324,141 @@ $('#drag-and-drop').on(
 						//SubTask Number to place here! Final List
 						for (var i = config.IDs.length; i--; ){
 							 var returnable = [];
-								for(var j = config.tasksNames.length; j--; ){
-									console.log(config.IDs[i] + ' ' + config.tasksNames[j]);
-									returnable.push(config.IDs[i] + ' ' + config.tasksNames[j]);
+								for(var j = 0; j < config.tasksNumber.length; j++){
+									returnable.push(config.IDs[i] + ' ' + config.tasksNumber[j]);
 								}
 						    config.IDs_plus_Tasks.push(returnable);
 						}
-						/*
-							4. forEach -> Client_Names(Client_Name) {
-							4.1. Client_Name copyTo B2-B[Client_Names.length], Final List
-							4.2. IDs_+_Tasks.forEach(IDs_+_Task) {
-								 IDs_+_Task copyTo D2-D[IDs_+_Tasks.length], Final List
-							 }
-							4.3. Tasks_Names.forEach(Tasks_Name) {
-								Tasks_Name copyTo F2-F[Tasks_Names.length], Final List
-							}
-						}
+						/*trimming the array of IDs_plus_Tasks by the number of the clients
+						  against the situation when we have extra data over the number of the clients	
 						*/
+						config.IDs_plus_Tasks.splice(config.clientNames.length, config.IDs_plus_Tasks.length - config.clientNames.length);
 						
 						var rangeSeeker = function(workSheet /*Final List*/, columnName /*Oracle Project Name*/) {
-							debugger;
-							var returnable = '';
-							var workbook = config.wb.Workbook.Sheets;
+							var workbook = config.wb['Workbook']['Sheets'];
+							var range;
+							var letterRanges = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+							var ref; 
+							var splitRefArrOf2; 
+							var upperBoundNum;
+							var higherBoundNum;
+							var upperBoundLetter;
+							var lowerBoundLetter;
+							var columnNameLetter;
 							workbook.forEach(function(sheet) {
 								if(sheet['name'] == workSheet) {
-									debugger;
-									var ref = config.wb.Sheets[sheet['name']]['!ref'];
-									var upperBound = parseInt(config.wb.Sheets[sheet['name']]['!ref'].split(':')[1].match(/\d+/));
-									var higherBound = parseInt(config.wb.Sheets[sheet['name']]['!ref'].split(':')[0].match(/\d+/));
-									var _columnName = config.wb.Sheets[sheet['name']][higherBound]['v'];
-											if(_columnName == columnName) {
-												returnable = config.wb.Sheets[sheet['name']]['!ref']
+									ref = config.wb.Sheets[sheet['name']]['!ref'];
+									splitRefArrOf2 = ref.split(':');
+									upperBoundNum = parseInt(config.wb.Sheets[sheet['name']]['!ref'].split(':')[0].match(/\d+/));
+									lowerBoundNum = parseInt(config.wb.Sheets[sheet['name']]['!ref'].split(':')[1].match(/\d+/));
+									upperBoundLetter = ref.split(':')[0].match(/\D/)[0];
+									lowerBoundLetter = ref.split(':')[1].match(/\D/)[0];
+									/*
+										у нас есть диапазон по всему листу. нужен диапазон по колонке! e.g., A2-A10
+										найти букву колонки и применить к ней конечную границу листа, т.е.: lowerBoundLetter
+										итерируй по буквам, чтобы найти букву твоей заданной колонки. нашёл - вертай такое: 
+										letter + upperBoundLetter : letter + lowerBoundLetter в строке: 
+										единственно неучтенный сценарий, если у нас пустые ячейки, а диапазон возвращается...
+									*/ 
+									for(var i = letterRanges.length; i--;) {
+										if(config.wb.Sheets[sheet['name']][letterRanges[i] + upperBoundNum] && 
+										   config.wb.Sheets[sheet['name']][letterRanges[i] + upperBoundNum]['v']){
+											if(config.wb.Sheets[sheet['name']][letterRanges[i] + upperBoundNum]['v'] == columnName || 
+											   config.wb.Sheets[sheet['name']][letterRanges[i] + upperBoundNum]['v'].includes(columnName)) {
+												//range = letterRanges[i] + (upperBoundNum+1) + ":" + letterRanges[i] + lowerBoundNum;
+												range = letterRanges[i] + (upperBoundNum+1) + ":" + letterRanges[i] + (upperBoundNum+1);
 											}
-									});
+										}
+									}
 								}
-							return returnable;
+							});
+							return range;
 						};
 						
-						for(var i = config.clientNames.length; i--; ) {
-							debugger;
+						var writeable = function(workbook, range, data /*config.clientNames*/) {
+									Object.keys(config.theWhat).forEach(function(i, j) {
+										if(config.theWhat[i].forEach && i == workbook) {
+											config.theWhat[i].forEach(function(z, w) {
+												var splitRange = range.split(':');
+												var startRange = range.split(':')[0];
+												var startRangeLetter = splitRange[0].match(/\D+/)[0];
+												var startRangeNumber = parseInt(splitRange[1].match(/\d+/)[0]);
+												for (var iter = 0; iter < data.length; iter++) {
+													z[startRange + '-' + startRangeLetter + (startRangeNumber+iter)] = data[iter];
+												}
+											});
+										}
+								});
+							};
 							
-							var clientName = config.clientNames[i];
-							var range = ''
-							range = rangeSeeker('Final List', 'Oracle Project Name');
+							var rangeIncrementer = function(range, byNum) {
+								var interim = range.split(':'),
+									interimLowerBound = interim[1], 
+									interimLowerBoundLetter = interim[1].match(/\D+/)[0], 
+									interimLowerBoundNumber = parseInt(interim[1].match(/\d+/)[0]); 
+									interimLowerBoundNumber = interimLowerBoundNumber + byNum-1; //changed to skip the empty line in-between
+									interim[1] = interimLowerBoundLetter + interimLowerBoundNumber;
+									range = range.replace(/[A-Z]\d+$/, interim[1]);
+									return range;
+							};
 							
-							Object.keys(config.theWhat).forEach(function(i, j) {
-								debugger;
-								if(config.theWhat[i].forEach){
-									debugger;
-										config.theWhat[i].forEach(function(z, w){
-											debugger;
-											z[Object.keys(z)[0]] = range;
-											
-											/*the writing mechanism: 
-												config.theWhat[sheet].forEach(function(i, j) {
-													debugger;
-													for (var cell in i) {
-														if(cell.match(/[-]/)) {
-														//we have got a range!
-															var s = cell.split('-')[0];
-															var e = cell.split('-')[1];
-															var sD = parseInt(s.match(/\d+/g)[0]);
-															var eD = parseInt(e.match(/\d+/g)[0]);
-															var rangeLetter = s.match(/\D+/g)[0];
-															for (var y = sD; y < eD+1; y++) {
-																if(config.wb.Sheets[sheet][rangeLetter+y]) {
-																	config.wb.Sheets[sheet][rangeLetter+y]['v'] = i[cell];
-																} else {
-																	config.wb.Sheets[sheet][rangeLetter+y] = {t: "n", v: i[cell], f: '', w: "0"};
-																}
-															}
-														} else {
-															if(config.wb.Sheets[sheet][cell]){
-															config.wb.Sheets[sheet][cell]['v'] = i[cell];
-															}else {
-																config.wb.Sheets[sheet][cell] = {t: "n", v: i[cell], f: '', w: "0"};
-															}
-														}
-													}
-												});
-											*/
-											
-										});
-									}
+							var clientNamesRange = rangeSeeker('Final List', 'Oracle Project Name');
+							var IDs_plus_TasksRange = rangeSeeker('Final List', 'SubTask Number');
+							var tasksRange = rangeSeeker('Final List', 'SubTask Name');
+							var subTaskDescriptionRange = rangeSeeker('Final List', 'SubTask Description');
+							
+							config.clientNames.forEach(function(clientName) {
+								console.log(clientName, "config.clientNames.forEach(function(clientName) {");
+								//4.1. Client_Name copyTo B2-B[Client_Names.length], Final List
+								var clientNamesArr = [];
+								for (var i = 0; i < config.tasksNames.length; i++){
+									clientNamesArr.push(clientName);
+								}
+								writeable('Final List', clientNamesRange, clientNamesArr);
+								//4.2. IDs_+_Task copyTo D2-D[IDs_+_Tasks.length], Final List
+								writeable('Final List', IDs_plus_TasksRange, config.IDs_plus_Tasks[0]);
+								config.IDs_plus_Tasks.splice(0, 1);
+								//4.3. Tasks_Name copyTo F2-F[Tasks_Names.length], Final List
+								writeable('Final List', tasksRange, config.tasksNames);
+								writeable('Final List', subTaskDescriptionRange, config.tasksNames);
+								clientNamesRange = rangeIncrementer(clientNamesRange, config.tasksNames.length+1);
+								tasksRange = rangeIncrementer(tasksRange, config.tasksNames.length+1);
+								IDs_plus_TasksRange = rangeIncrementer(IDs_plus_TasksRange, config.tasksNames.length+1);
+								subTaskDescriptionRange = rangeIncrementer(subTaskDescriptionRange, config.tasksNames.length+1);
 							});
 							
-						}
+							console.log(config.theWhat['Final List'][0]);
+							
+							for (var sheet in config.theWhat){
+								if(config.theWhat[sheet] && ({}).toString.call(config.theWhat[sheet]) == '[object Array]') {
+									config.theWhat[sheet].forEach(function(range_value_pair, j) {
+										for (var cell in range_value_pair) {
+											if(cell.match(/[-]/)) {
+												var column = cell.split('-')[0];
+												var row = cell.split('-')[1];
+												var rowNumber = parseInt(row.match(/\d+/)[0]);
+												var rangeLetter = column.match(/\D+/g)[0];
+												var val = range_value_pair[cell];
+												var ref = config.wb.Sheets[sheet]['!ref'];
+												var refLowerBound = parseInt(config.wb.Sheets[sheet]['!ref'].split(':')[1].match(/\d+/));
+												if(rowNumber > refLowerBound){
+													config.wb.Sheets[sheet]['!ref'].replace(/\d+$/, rowNumber);
+												}
+												if(config.wb.Sheets[sheet][rangeLetter + rowNumber]) {
+													config.wb.Sheets[sheet][rangeLetter + rowNumber]['v'] = val;
+												} else {
+													config.wb.Sheets[sheet][rangeLetter + rowNumber] = {t: "n", v: val, f: '', w: "0"};
+												}
+											}
+										}
+									});
+								}
+							}
+							
+							
+							config.processWb();
 					}
-					config.processWb();
+					
 		}		
 	});
 	/*onclick on the btn clear the workbook will clear the area with the html-ised workbook*/
