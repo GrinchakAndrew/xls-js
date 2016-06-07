@@ -1,4 +1,5 @@
 var config = {
+var config = {
     /*theWhat -> the number of sheets in the wb*/
     theWhat: {},
     sheetNames: '',
@@ -278,7 +279,6 @@ $(document).ready(function() {
     }); */
     /*processing the process the workbook btn*/
     $('#process_wb').on('click', function() {
-		debugger;
         var val = $('textarea[id="range_new_val_text_area"]').val();
         /* config.workSheet = $('textarea[id="ws_text_area"]').val(); */
         /*match if we have got the Date to set to the table*/
@@ -349,7 +349,6 @@ $(document).ready(function() {
                 config.tasksNames.reverse();
                 config.tasksNumber = getItemNamesByColumn('WBS', 'Task number');
                 config.tasksNumber.reverse();
-
                 //3. All IDs -> array
                 config.IDs = getItemNamesByColumn('Campaigns', 'ID');
                 //3.1 All IDs_+_Tasks -> array for SubTask Number 
@@ -407,6 +406,9 @@ $(document).ready(function() {
                                 var startRange = range.split(':')[0];
                                 var startRangeLetter = splitRange[0].match(/\D+/)[0];
                                 var startRangeNumber = parseInt(splitRange[1].match(/\d+/)[0]);
+								if(!data.length){
+									debugger;
+								}
                                 for (var iter = 0; iter < data.length; iter++) {
                                     z[startRange + '-' + startRangeLetter + (startRangeNumber + iter)] = data[iter];
                                 }
