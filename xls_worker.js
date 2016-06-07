@@ -343,6 +343,7 @@ $(document).ready(function() {
                     return returnable;
                 };
                 config.clientNames = getItemNamesByColumn('Campaigns', 'Client Name');
+				config.clientNames.reverse();
                 //2. get All the Tasks_Names -> array
                 config.tasksNames = getItemNamesByColumn('WBS', 'Task name');
                 config.tasksNames.reverse();
