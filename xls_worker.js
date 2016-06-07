@@ -1,5 +1,4 @@
 var config = {
-var config = {
     /*theWhat -> the number of sheets in the wb*/
     theWhat: {},
     sheetNames: '',
@@ -406,12 +405,11 @@ $(document).ready(function() {
                                 var startRange = range.split(':')[0];
                                 var startRangeLetter = splitRange[0].match(/\D+/)[0];
                                 var startRangeNumber = parseInt(splitRange[1].match(/\d+/)[0]);
-								if(!data.length){
-									debugger;
+								if(data.length){
+									for (var iter = 0; iter < data.length; iter++) {
+										z[startRange + '-' + startRangeLetter + (startRangeNumber + iter)] = data[iter];
+									}	
 								}
-                                for (var iter = 0; iter < data.length; iter++) {
-                                    z[startRange + '-' + startRangeLetter + (startRangeNumber + iter)] = data[iter];
-                                }
                             });
                         }
                     });
