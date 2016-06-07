@@ -253,7 +253,7 @@ $(document).ready(function() {
                             throw new UserException("The Excel File Seems To Have No Sheets!");
                         }
                         //make sure we have got only 1 sheet, because i do not have the multi-sheet representation:
-                        config.htmlize();
+                        /* config.htmlize(); */
                     };
                     reader.readAsBinaryString(config.f);
                     config.fnArr.push(function(el) {
@@ -270,18 +270,19 @@ $(document).ready(function() {
             }
         }
     );
-    $(document).on('click', function(e) {
+    /* $(document).on('click', function(e) {
         config.onclicker(e)
-    });
+    }); */
     /* $('#textarea textarea').on('mousedown', function() {
     	this.value = '';	
     }); */
     /*processing the process the workbook btn*/
     $('#process_wb').on('click', function() {
+		debugger;
         var val = $('textarea[id="range_new_val_text_area"]').val();
         /* config.workSheet = $('textarea[id="ws_text_area"]').val(); */
         /*match if we have got the Date to set to the table*/
-        if (val && $('tbody').html() && $('textarea[id="range_new_val_text_area"]').val().match(/^\n?\s?\D+?\d+?\s?(?=[-])\s?[-]\s?\D+\d+\s?[:]\s?.*/)) {
+        if (val /* && $('tbody').html() */ && $('textarea[id="range_new_val_text_area"]').val().match(/^\n?\s?\D+?\d+?\s?(?=[-])\s?[-]\s?\D+\d+\s?[:]\s?.*/)) {
             if (val.match(/new Date/) && $('textarea[id="range_new_val_text_area"]').val().match(/^\n?\s?\D+?\d+?\s?(?=[-])\s?[-]\s?\D+\d+\s?[:]\s?.*/)) {
                 config.range = val.match(/^\D+\d+[-]\D+\d+/);
                 config.range[0] = config.range[0].replace(/\s+/g, '');
@@ -301,7 +302,7 @@ $(document).ready(function() {
             });
             config.processWb();
             /*match if we have got the other data to set*/
-        } else if (val && $('tbody').html()) {
+        } else if (val /* && $('tbody').html() */) {
             //automation specifically for Natalia 
             var txtarea = "";
             txtarea = $('textarea[id="range_new_val_text_area"]').val().replace(" ", "");
