@@ -10,6 +10,7 @@ var config = {
     clientNames: '',
     tasksNames: '',
     tasksNumber: '',
+	OANames : '',
     IDs: '',
     IDs_plus_Tasks: [],
     fnArr: [function(el) {
@@ -303,6 +304,7 @@ $(document).ready(function() {
             /*match if we have got the other data to set*/
         } else if (val /* && $('tbody').html() */) {
             //automation specifically for Natalia 
+			debugger;
             var txtarea = "";
             txtarea = $('textarea[id="range_new_val_text_area"]').val().replace(" ", "");
             txtarea = txtarea.match(/[{|A-Z|1-9|}].*/g);
@@ -310,7 +312,6 @@ $(document).ready(function() {
                 var d = val;
                 config.newVal = JSDateToExcelDate(new Function("return " + d + ";")().getTime())
                 val = config.newVal;
-                console.log("new Date part of code has been matched!");
             }
             /*we check if we have a customized change request to automate: enclose all custom requests with {}*/
             if (txtarea[txtarea.length - 1] == "}" && txtarea[0] == "{") {
@@ -344,8 +345,18 @@ $(document).ready(function() {
                 config.clientNames = getItemNamesByColumn('Campaigns', 'Client Name');
 				config.clientNames.reverse();
                 //2. get All the Tasks_Names -> array
+				/*
+					modifiction#1 [Jul-22, 2016:11:17]
+					ADDITION : 
+					config.OANames = getItemNamesByColumn('Campaigns', 'OA Name');
+					
+				*/
                 config.tasksNames = getItemNamesByColumn('WBS', 'Task name');
                 config.tasksNames.reverse();
+				
+				config.OANames = getItemNamesByColumn('Campaigns', 'OA Name');
+				config.OANames.reverse();
+				
                 config.tasksNumber = getItemNamesByColumn('WBS', 'Task number');
                 config.tasksNumber.reverse();
                 //3. All IDs -> array
@@ -429,7 +440,6 @@ $(document).ready(function() {
                 var tasksRange = rangeSeeker('Final List', 'SubTask Name');
                 var subTaskDescriptionRange = rangeSeeker('Final List', 'SubTask Description');
                 config.clientNames.forEach(function(clientName) {
-                    console.log(clientName, "config.clientNames.forEach(function(clientName) {");
                     //4.1. Client_Name copyTo B2-B[Client_Names.length], Final List
                     var clientNamesArr = [];
                     for (var i = 0; i < config.tasksNames.length; i++) {
@@ -441,11 +451,11 @@ $(document).ready(function() {
                     config.IDs_plus_Tasks.splice(0, 1);
                     //4.3. Tasks_Name copyTo F2-F[Tasks_Names.length], Final List
                     writeable('Final List', tasksRange, config.tasksNames);
-                    writeable('Final List', subTaskDescriptionRange, config.tasksNames);
+                    writeable('Final List', subTaskDescriptionRange, config.OANames);
                     clientNamesRange = rangeIncrementer(clientNamesRange, config.tasksNames.length + 1);
                     tasksRange = rangeIncrementer(tasksRange, config.tasksNames.length + 1);
                     IDs_plus_TasksRange = rangeIncrementer(IDs_plus_TasksRange, config.tasksNames.length + 1);
-                    subTaskDescriptionRange = rangeIncrementer(subTaskDescriptionRange, config.tasksNames.length + 1);
+                    subTaskDescriptionRange = rangeIncrementer(subTaskDescriptionRange, config.OANames.length + 1);
                 });
                 for (var sheet in config.theWhat) {
                     if (config.theWhat[sheet] && ({}).toString.call(config.theWhat[sheet]) == '[object Array]') {
