@@ -1,3 +1,4 @@
+
 var config = {
     /*theWhat -> the number of sheets in the wb*/
     theWhat: {},
@@ -435,28 +436,38 @@ $(document).ready(function() {
                     range = range.replace(/[A-Z]\d+$/, interim[1]);
                     return range;
                 };
-                var clientNamesRange = rangeSeeker('Final List', 'Oracle Project Name');
+                
+				var clientNamesRange = rangeSeeker('Final List', 'Oracle Project Name');
                 var IDs_plus_TasksRange = rangeSeeker('Final List', 'SubTask Number');
                 var tasksRange = rangeSeeker('Final List', 'SubTask Name');
                 var subTaskDescriptionRange = rangeSeeker('Final List', 'SubTask Description');
+				
                 config.clientNames.forEach(function(clientName) {
                     //4.1. Client_Name copyTo B2-B[Client_Names.length], Final List
                     var clientNamesArr = [];
+					var OANamesArr = [];
+					
                     for (var i = 0; i < config.tasksNames.length; i++) {
                         clientNamesArr.push(clientName);
+						OANamesArr.push(config.OANames[0]);
                     }
+					
                     writeable('Final List', clientNamesRange, clientNamesArr);
                     //4.2. IDs_+_Task copyTo D2-D[IDs_+_Tasks.length], Final List
                     writeable('Final List', IDs_plus_TasksRange, config.IDs_plus_Tasks[0]);
                     config.IDs_plus_Tasks.splice(0, 1);
                     //4.3. Tasks_Name copyTo F2-F[Tasks_Names.length], Final List
                     writeable('Final List', tasksRange, config.tasksNames);
-                    writeable('Final List', subTaskDescriptionRange, config.OANames);
+                    writeable('Final List', subTaskDescriptionRange, OANamesArr);
                     clientNamesRange = rangeIncrementer(clientNamesRange, config.tasksNames.length + 1);
                     tasksRange = rangeIncrementer(tasksRange, config.tasksNames.length + 1);
                     IDs_plus_TasksRange = rangeIncrementer(IDs_plus_TasksRange, config.tasksNames.length + 1);
-                    subTaskDescriptionRange = rangeIncrementer(subTaskDescriptionRange, config.OANames.length + 1);
+                    subTaskDescriptionRange = rangeIncrementer(subTaskDescriptionRange, config.tasksNames.length + 1);
+					
+					config.OANames.splice(0, 1);
+					
                 });
+				
                 for (var sheet in config.theWhat) {
                     if (config.theWhat[sheet] && ({}).toString.call(config.theWhat[sheet]) == '[object Array]') {
                         config.theWhat[sheet].forEach(function(range_value_pair, j) {
