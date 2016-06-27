@@ -33,6 +33,7 @@
 		</ul>
 		<textarea id="range_new_val_text_area">
 		{
+		
 			1. All Client_Names -> array
 2. All Tasks_Names -> array
 3. All IDs_+_Tasks -> array
@@ -49,6 +50,25 @@
 		</textarea>
 		
 		<!--
+		
+		(1) make it possible to add an input to get data from workbook and column
+		input : Pls., tell what to get by stating the worksheet name and the name of the column
+		
+			button 'Get items collection [Workbook Name, Column Name]'
+		
+			button 'Get Range per Items Collection [Workbook Name, Column Name]'
+		
+		(2)Combine button: 
+		
+		input: pls. state which data should be combined: e.g., column 1 each + column 2 each
+		
+		'Combine WHAT[name of the combined items array] => [array item + array item]'
+		
+		(3) Foreach WHAT [source items array] -> 
+				each WHAT copyTo WHERE [Workbook, Items Collection Range, Items Collection Array] 
+					-> Repeat by the number of Items Array.length  [Items Array Collection Name, Workbook Name]
+				
+		
 		1. All Client_Names -> array
 		2. All Tasks_Names -> array
 		3. All IDs_+_Tasks -> array

@@ -343,7 +343,7 @@ $(document).ready(function() {
                     });
                     return returnable;
                 };
-                config.clientNames = getItemNamesByColumn('Campaigns', 'Client Name');
+                config.clientNames = getItemNamesByColumn('Campaigns', 'Oracle Project name');
 				config.clientNames.reverse();
                 //2. get All the Tasks_Names -> array
 				/*
